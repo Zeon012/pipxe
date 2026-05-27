@@ -425,12 +425,29 @@ class WVSButtons:
             time.sleep(0.01)
             for pin in self.PINS:
                 if not GPIO.input(pin):
+                    # detect press and measure duration for long-press actions
+                    press_start = time.time()
+                    # wait while button held (active-low)
+                    while not GPIO.input(pin):
+                        time.sleep(0.01)
+                        # cap wait to avoid blocking too long
+                        if time.time() - press_start > 5.0:
+                            break
+
+                    duration = time.time() - press_start
+
                     # simple debounce: ignore bounces within 200ms for same pin
                     button_time_d = time.time() - self._button_last_time
                     if self._button_last == pin and 0 < button_time_d < 0.2:
                         continue
                     self._button_last_time = time.time()
                     self._button_last = pin
+
+                    # long-press on left -> shutdown
+                    if pin == self.J_LEFT and duration >= 1.5:
+                        return "shutdown"
+
+                    # otherwise return the mapped short-press action
                     try:
                         return self.BUTTON_NAMES[pin]
                     except KeyError:
@@ -482,6 +499,7 @@ class Main:
             "confirm" : self._button_mount,
             "right" : self._button_toggle_mode,
             "left" : self._button_cancel,
+            "shutdown" : self._button_shutdown,
         }
 
     def main(self):
