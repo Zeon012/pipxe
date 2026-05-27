@@ -50,6 +50,9 @@ REMOVE_SCRIPTS = {
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
 
+# Reduce noisy GPIO warnings when reloading the script
+GPIO.setwarnings(False)
+
 class SH1106:
     def __init__(self):
         spi = spidev.SpiDev(0, 0)
@@ -413,7 +416,7 @@ class Display:
 class WVSButtons:
     def __init__(self):
         self._button_last_time = 0
-        self._button_last = 0
+        self._button_last = None
         for pin in self.PINS:
             GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
@@ -422,8 +425,9 @@ class WVSButtons:
             time.sleep(0.01)
             for pin in self.PINS:
                 if not GPIO.input(pin):
+                    # simple debounce: ignore bounces within 200ms for same pin
                     button_time_d = time.time() - self._button_last_time
-                    if self._button_last == pin and button_time_d > 0 and button_time_d < 0.1:
+                    if self._button_last == pin and 0 < button_time_d < 0.2:
                         continue
                     self._button_last_time = time.time()
                     self._button_last = pin
@@ -457,6 +461,7 @@ class WVSButtons:
         J_UP : "up",
         J_DOWN : "down",
         J_LEFT : "left",
+        J_RIGHT: "right",
     }
 
 
@@ -474,7 +479,9 @@ class Main:
             "mount" : self._button_mount,
             "umount" : self._button_umount,
             "mode" : self._button_mode,
-            "left" : self._button_shutdown,
+            "confirm" : self._button_mount,
+            "right" : self._button_toggle_mode,
+            "left" : self._button_cancel,
         }
 
     def main(self):
@@ -500,6 +507,20 @@ class Main:
     def _button_mode(self):
         # Open a mode selection menu so the user can choose the desired mode
         self._open_mode_menu()
+
+    def _button_toggle_mode(self):
+        # quick toggle between available modes (cd -> usb -> hdd -> cd)
+        new_mode = self._state.toogle_mode()
+        LOGGER.debug("Toggled mode to %s", new_mode)
+
+    def _button_cancel(self):
+        # no-op safe cancel; give brief feedback
+        disp = self._display._disp
+        msg_img = Image.new('RGB', (disp.WIDTH_RES, disp.HEIGHT_RES), (10, 14, 18))
+        draw = ImageDraw.Draw(msg_img)
+        draw.text((8, 54), "CANCELLED", font=self._display._font_hdd, fill=(170,170,170))
+        disp.display_image(msg_img)
+        time.sleep(0.6)
 
     def _open_mode_menu(self):
         # Interactive mode selection using the existing display and buttons.
