@@ -42,6 +42,11 @@ into `/opt/pipxe` and follow `INSTALL.md`.
 Contact / Next steps
 --------------------
 - Repo owner: https://github.com/Zeon012/pipxe
-  (This repository is maintained independently and is not being
-  contributed back to the original `gadget_cdrom` project.)
+  
+Hard fork
+---------
+This repository is a hard fork of the original `gadget_cdrom` project and is
+maintained independently. Changes in this repository will not be proposed or
+merged back into the upstream `gadget_cdrom` repository. Use at your own
+discretion; retain the original `LICENSE` when reusing upstream code.
 
