@@ -1,0 +1,27 @@
+#cloud-config
+hostname: pi-iso
+manage_etc_hosts: true
+packages:
+- avahi-daemon
+apt:
+  conf: |
+    Acquire {
+      Check-Date "false";
+    };
+timezone: America/Chicago
+keyboard:
+  model: pc105
+  layout: "us"
+enable_ssh: true
+users:
+- name: piusb
+  groups: users,adm,dialout,audio,netdev,video,plugdev,cdrom,games,input,gpio,spi,i2c,render,sudo
+  shell: /bin/bash
+  lock_passwd: false
+  passwd: $y$jB5$eZrQa3aI3VJA5ZpRmVpQk.$p05wIdRy/7AUZlZ0uf5VMGG79zaYf/0oI5.DI1aOl.7
+  ssh_authorized_keys:
+    - ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBDYguvUt4Wu42IAlC8MBAKGOd4Q5NwOXIMqmS0aw/aCT0bjwNhEhAGMs4IqZdALIVlk7ouSrQ6dc2VJU2/qdstA= lsu\mvanwi3@CCT-IT-0001007
+  sudo: ALL=(ALL) NOPASSWD:ALL
+rpi:
+  interfaces:
+    serial: true

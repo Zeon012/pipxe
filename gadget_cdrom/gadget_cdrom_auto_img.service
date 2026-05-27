@@ -1,0 +1,16 @@
+[Unit]
+Description=gadget_cdrom
+Before=basic.target
+After=local-fs.target sysinit.target
+DefaultDependencies=no
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/gadget_cdrom
+ExecStartPre=/opt/gadget_cdrom/create_image.sh auto
+ExecStart=/opt/gadget_cdrom/gadget_cdrom.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
