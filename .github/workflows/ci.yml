@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, 'pr/*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  syntax-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Check Python syntax
+        run: |
+          python -m pip install --upgrade pip
+          files=$(git ls-files '*.py' || true)
+          if [ -n "$files" ]; then
+            python -m py_compile $files
+          fi
+      - name: Check shell scripts for executable bits
+        run: |
+          sh_files=$(git ls-files '*.sh' || true)
+          for f in $sh_files; do
+            if [ -f "$f" ] && [ ! -x "$f" ]; then
+              echo "Warning: $f is not executable"
+            fi
+          done
