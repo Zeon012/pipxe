@@ -42,6 +42,6 @@ into `/opt/pipxe` and follow `INSTALL.md`.
 Contact / Next steps
 --------------------
 - Repo owner: https://github.com/Zeon012/pipxe
-- If you want, I can push the branch with the original upstream patch to a PR
-  against `tjmnmk/gadget_cdrom`, or prepare a release here.
+  (This repository is maintained independently and is not being
+  contributed back to the original `gadget_cdrom` project.)
 
